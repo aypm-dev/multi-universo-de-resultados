@@ -2390,15 +2390,22 @@ const MotorJuego = {
 ======================================================== */
 
 /* ========================================================
-   FONDO CÓSMICO SHADER (CANVAS 2D ULTRA-FLUIDO Y DE BAJO CONTRASTE)
+   FONDO CÓSMICO MULTIVERSAL (CANVAS 2D - ESTILO CARTOONISH & SHADERTOY)
+   - Nebulosas cósmicas volumétricas y vórtice de portal interdimensional giratorio
+   - Estrellas titilantes cartoon (destellos de 4 puntas) y estrellas fugaces
+   - Planeta anillado distante en paralaje cósmico
+   - Elementos icónicos de cada universo teletransportados al vacío en gravedad cero:
+     * Homer Simpson: Rosquilla rosa glaseada, Barra de plutonio radiactiva, Lata Duff
+     * Rick Sánchez: Pistola de portales, Pepinillo Rick (Pickle Rick)
+     * Eric Cartman: Bolsa y snack de Cheesy Poofs
+     * Stewie Griffin: Oso Rupert de peluche, Pistola de rayos retro
+   - Interacción dinámica con el cursor (repulsión en gravedad cero)
 ======================================================== */
 function iniciarFondoCosmico() {
   const canvas = document.getElementById('cosmicCanvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   let w = 0, h = 0;
-  let particulas = [];
-  const CANTIDAD = 45;
 
   function redimensionar() {
     w = canvas.width = window.innerWidth;
@@ -2407,94 +2414,732 @@ function iniciarFondoCosmico() {
   window.addEventListener('resize', redimensionar);
   redimensionar();
 
-  for (let i = 0; i < CANTIDAD; i++) {
-    particulas.push({
+  // Coordenadas del mouse para repulsión en gravedad cero
+  const mouse = { x: -1000, y: -1000, activo: false };
+  window.addEventListener('mousemove', (e) => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+    mouse.activo = true;
+  }, { passive: true });
+  window.addEventListener('mouseleave', () => {
+    mouse.activo = false;
+  });
+
+  // Utilidad compatible para rectángulos redondeados
+  function trazarRectRedondeado(c, x, y, width, height, radius) {
+    if (typeof c.roundRect === 'function') {
+      c.roundRect(x, y, width, height, radius);
+    } else {
+      c.moveTo(x + radius, y);
+      c.lineTo(x + width - radius, y);
+      c.quadraticCurveTo(x + width, y, x + width, y + radius);
+      c.lineTo(x + width, y + height - radius);
+      c.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      c.lineTo(x + radius, y + height);
+      c.quadraticCurveTo(x, y + height, x, y + height - radius);
+      c.lineTo(x, y + radius);
+      c.quadraticCurveTo(x, y, x + radius, y);
+    }
+  }
+
+  // 1. Estrellas de fondo normales (60)
+  const estrellas = [];
+  for (let i = 0; i < 60; i++) {
+    estrellas.push({
       x: Math.random() * w,
       y: Math.random() * h,
-      vx: (Math.random() - 0.5) * 0.35,
-      vy: (Math.random() - 0.5) * 0.35,
-      radio: Math.random() * 2 + 0.8,
-      alpha: Math.random() * 0.45 + 0.2,
-      color: Math.random() > 0.45 ? '56, 189, 248' : '168, 85, 247'
+      radio: Math.random() * 1.6 + 0.6,
+      alpha: Math.random() * 0.6 + 0.2,
+      fase: Math.random() * Math.PI * 2,
+      color: Math.random() > 0.6 ? '200, 230, 255' : (Math.random() > 0.5 ? '255, 235, 180' : '230, 210, 255')
     });
   }
 
+  // 2. Destellos cartoon de 4 puntas (14)
+  const destellos = [];
+  for (let i = 0; i < 14; i++) {
+    destellos.push({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      tamanio: Math.random() * 6 + 4.5,
+      rot: Math.random() * Math.PI,
+      velRot: (Math.random() - 0.5) * 0.008,
+      fase: Math.random() * Math.PI * 2,
+      color: Math.random() > 0.5 ? '#38bdf8' : (Math.random() > 0.5 ? '#facc15' : '#e879f9')
+    });
+  }
+
+  // 3. Sistema de estrellas fugaces (cometas cartoon)
+  let estrellaFugaz = null;
+  function lanzarEstrellaFugaz() {
+    estrellaFugaz = {
+      x: Math.random() * w * 0.8 + w * 0.1,
+      y: Math.random() * h * 0.4,
+      longitud: Math.random() * 90 + 70,
+      angulo: Math.PI / 4 + (Math.random() - 0.5) * 0.35,
+      velocidad: Math.random() * 12 + 11,
+      vida: 1.0,
+      desvanecimiento: Math.random() * 0.02 + 0.018
+    };
+  }
+
+  // 4. Elementos de caricaturas flotando en gravedad cero (8 elementos icónicos)
+  const tiposItems = [
+    'dona',           // Homer (Doughnut con chispas)
+    'plutonio',       // Homer (Barra nuclear radiactiva)
+    'duff',           // Homer (Lata Duff)
+    'portalgun',      // Rick (Pistola de portales)
+    'pepinillo',      // Rick (Pickle Rick)
+    'cheesypoofs',    // Cartman (Bolsa de Cheesy Poofs)
+    'rupert',         // Stewie (Oso de peluche Rupert)
+    'raygun'          // Stewie (Pistola de rayos retro)
+  ];
+
+  const itemsFlotantes = [];
+  tiposItems.forEach((tipo, idx) => {
+    const col = idx % 4;
+    const fil = Math.floor(idx / 4);
+    const margenX = w / 4;
+    const margenY = h / 2;
+
+    itemsFlotantes.push({
+      tipo: tipo,
+      x: col * margenX + Math.random() * (margenX * 0.7) + margenX * 0.15,
+      y: fil * margenY + Math.random() * (margenY * 0.7) + margenY * 0.15,
+      vx: (Math.random() - 0.5) * 0.45,
+      vy: (Math.random() - 0.5) * 0.4,
+      rot: Math.random() * Math.PI * 2,
+      velRot: (Math.random() - 0.5) * 0.012,
+      escala: Math.random() * 0.2 + 0.85,
+      wobbleFase: Math.random() * Math.PI * 2,
+      wobbleVel: Math.random() * 0.02 + 0.01
+    });
+  });
+
+  // --- Funciones de Renderizado Vectorial de los Objetos Cartoon ---
+  function dibujarDona(c) {
+    c.save();
+    c.lineWidth = 3;
+    c.strokeStyle = '#2d1808';
+    c.fillStyle = '#e5a65e';
+    c.beginPath();
+    c.arc(0, 0, 24, 0, Math.PI * 2);
+    c.fill();
+    c.stroke();
+
+    // Glaseado rosa ondeante
+    c.fillStyle = '#ff6097';
+    c.beginPath();
+    for (let a = 0; a < Math.PI * 2; a += 0.25) {
+      const r = 22 + Math.sin(a * 7) * 2.2;
+      const x = Math.cos(a) * r;
+      const y = Math.sin(a) * r;
+      if (a === 0) c.moveTo(x, y);
+      else c.lineTo(x, y);
+    }
+    c.closePath();
+    c.fill();
+
+    // Agujero central
+    c.fillStyle = '#050816';
+    c.beginPath();
+    c.arc(0, 0, 8, 0, Math.PI * 2);
+    c.fill();
+    c.stroke();
+
+    // Chispas de colores (sprinkles)
+    const sprinkles = [
+      { x: -13, y: -9, rot: 0.4, col: '#38bdf8' },
+      { x: 11, y: -11, rot: -0.6, col: '#facc15' },
+      { x: -14, y: 9, rot: 1.1, col: '#a855f7' },
+      { x: 12, y: 10, rot: 0.2, col: '#4ade80' },
+      { x: 0, y: -16, rot: 1.5, col: '#ffffff' },
+      { x: -2, y: 15, rot: -0.4, col: '#f43f5e' },
+      { x: -16, y: -1, rot: 0.8, col: '#facc15' },
+      { x: 16, y: -2, rot: -0.9, col: '#38bdf8' }
+    ];
+    sprinkles.forEach(s => {
+      c.save();
+      c.translate(s.x, s.y);
+      c.rotate(s.rot);
+      c.fillStyle = s.col;
+      c.fillRect(-2.8, -1.2, 5.6, 2.4);
+      c.restore();
+    });
+    c.restore();
+  }
+
+  function dibujarBarraRadiactiva(c) {
+    c.save();
+    c.shadowColor = '#39ff14';
+    c.shadowBlur = 18;
+    c.fillStyle = '#22c55e';
+    c.strokeStyle = '#052e16';
+    c.lineWidth = 2.5;
+
+    c.beginPath();
+    trazarRectRedondeado(c, -9, -26, 18, 52, 8);
+    c.fill();
+    c.stroke();
+
+    // Núcleo verde fluorescente
+    c.fillStyle = '#86efac';
+    c.fillRect(-4, -18, 8, 36);
+
+    // Tapas metálicas en extremos
+    c.shadowBlur = 0;
+    c.fillStyle = '#64748b';
+    c.strokeStyle = '#0f172a';
+    c.fillRect(-11, -28, 22, 5);
+    c.strokeRect(-11, -28, 22, 5);
+    c.fillRect(-11, 23, 22, 5);
+    c.strokeRect(-11, 23, 22, 5);
+
+    // Símbolo radiactivo trefoil central
+    c.fillStyle = '#052e16';
+    c.beginPath();
+    c.arc(0, 0, 2.5, 0, Math.PI * 2);
+    c.fill();
+    for (let i = 0; i < 3; i++) {
+      c.beginPath();
+      c.moveTo(0, 0);
+      c.arc(0, 0, 6.5, (i * 120 - 22) * Math.PI / 180, (i * 120 + 22) * Math.PI / 180);
+      c.closePath();
+      c.fill();
+    }
+    c.restore();
+  }
+
+  function dibujarLataDuff(c) {
+    c.save();
+    c.lineWidth = 2;
+    c.strokeStyle = '#450a0a';
+
+    // Lata roja
+    c.fillStyle = '#dc2626';
+    c.fillRect(-10, -18, 20, 36);
+    c.strokeRect(-10, -18, 20, 36);
+
+    // Banda blanca central
+    c.fillStyle = '#ffffff';
+    c.fillRect(-10, -6, 20, 12);
+
+    // Logotipo DUFF estilizado
+    c.fillStyle = '#000000';
+    c.font = 'bold 7.5px sans-serif';
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillText('Duff', 0, 0);
+
+    // Tapas metálicas plateadas
+    c.fillStyle = '#94a3b8';
+    c.fillRect(-10, -20, 20, 3);
+    c.fillRect(-10, 17, 20, 3);
+    c.restore();
+  }
+
+  function dibujarPistolaPortales(c) {
+    c.save();
+    c.lineWidth = 2;
+    c.strokeStyle = '#0f172a';
+
+    // Mango y estructura gris
+    c.fillStyle = '#94a3b8';
+    c.beginPath();
+    c.moveTo(-14, 10);
+    c.lineTo(-7, -4);
+    c.lineTo(22, -4);
+    c.lineTo(22, 4);
+    c.lineTo(-2, 4);
+    c.lineTo(-7, 14);
+    c.closePath();
+    c.fill();
+    c.stroke();
+
+    // Tubo emisor delantero
+    c.fillStyle = '#cbd5e1';
+    c.fillRect(22, -2, 6, 4);
+    c.strokeRect(22, -2, 6, 4);
+
+    // Cúpula superior con fluido de portal verde
+    c.shadowColor = '#00ff88';
+    c.shadowBlur = 14;
+    c.fillStyle = '#22c55e';
+    c.beginPath();
+    c.arc(7, -11, 8.5, 0, Math.PI * 2);
+    c.fill();
+    c.stroke();
+
+    // Brillo de cristal
+    c.fillStyle = '#bbf7d0';
+    c.beginPath();
+    c.arc(5, -13, 2.8, 0, Math.PI * 2);
+    c.fill();
+
+    // Pantalla LED roja
+    c.shadowBlur = 0;
+    c.fillStyle = '#ef4444';
+    c.fillRect(-1, -3, 7, 5);
+    c.strokeRect(-1, -3, 7, 5);
+    c.restore();
+  }
+
+  function dibujarPepinillo(c) {
+    c.save();
+    c.lineWidth = 2;
+    c.strokeStyle = '#064e3b';
+
+    // Cuerpo de pepinillo arqueado
+    c.fillStyle = '#16a34a';
+    c.beginPath();
+    c.ellipse(0, 0, 12, 28, -0.15, 0, Math.PI * 2);
+    c.fill();
+    c.stroke();
+
+    // Textura y verrugas
+    c.fillStyle = '#15803d';
+    [
+      { x: -5, y: -15, r: 2.3 }, { x: 4, y: -9, r: 2 },
+      { x: -6, y: 5, r: 2 }, { x: 3, y: 14, r: 2.5 },
+      { x: -2, y: 20, r: 1.8 }
+    ].forEach(b => {
+      c.beginPath();
+      c.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+      c.fill();
+    });
+
+    // Ojos desorbitados de Rick
+    c.fillStyle = '#ffffff';
+    c.beginPath();
+    c.arc(-4, -6, 3.8, 0, Math.PI * 2);
+    c.arc(4, -6, 3.8, 0, Math.PI * 2);
+    c.fill();
+    c.stroke();
+
+    // Pupilas
+    c.fillStyle = '#0f172a';
+    c.beginPath();
+    c.arc(-3, -6, 1.5, 0, Math.PI * 2);
+    c.arc(4, -6, 1.5, 0, Math.PI * 2);
+    c.fill();
+
+    // Uniceja celeste de Rick
+    c.strokeStyle = '#38bdf8';
+    c.lineWidth = 2.2;
+    c.beginPath();
+    c.moveTo(-7, -11);
+    c.lineTo(7, -11);
+    c.stroke();
+
+    // Boca abierta
+    c.strokeStyle = '#064e3b';
+    c.lineWidth = 1.6;
+    c.beginPath();
+    c.arc(0, 2, 4.5, 0.2, Math.PI - 0.2);
+    c.stroke();
+    c.restore();
+  }
+
+  function dibujarCheesyPoofs(c) {
+    c.save();
+    c.lineWidth = 2;
+    c.strokeStyle = '#450a0a';
+
+    // Bolsa roja de Cheesy Poofs
+    c.fillStyle = '#dc2626';
+    c.beginPath();
+    c.moveTo(-14, -20);
+    c.lineTo(14, -18);
+    c.lineTo(16, 20);
+    c.lineTo(-12, 22);
+    c.closePath();
+    c.fill();
+    c.stroke();
+
+    // Franja amarilla
+    c.fillStyle = '#fbbf24';
+    c.beginPath();
+    c.moveTo(-13, -5);
+    c.lineTo(15, -3);
+    c.lineTo(15, 7);
+    c.lineTo(-13, 5);
+    c.closePath();
+    c.fill();
+
+    // Texto POOFS
+    c.fillStyle = '#450a0a';
+    c.font = 'bold 8px sans-serif';
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillText('POOFS', 1, 1);
+
+    // Cheesy Poof inflado flotando al lado
+    c.fillStyle = '#f97316';
+    c.strokeStyle = '#7c2d12';
+    c.beginPath();
+    c.arc(15, -13, 5.5, 0, Math.PI * 2);
+    c.fill();
+    c.stroke();
+    c.restore();
+  }
+
+  function dibujarRupert(c) {
+    c.save();
+    c.lineWidth = 2;
+    c.strokeStyle = '#3e2723';
+
+    // Orejas de oso
+    c.fillStyle = '#795548';
+    c.beginPath();
+    c.arc(-10, -13, 5.5, 0, Math.PI * 2);
+    c.arc(10, -13, 5.5, 0, Math.PI * 2);
+    c.fill();
+    c.stroke();
+
+    // Interior de orejas
+    c.fillStyle = '#d7ccc8';
+    c.beginPath();
+    c.arc(-10, -13, 2.8, 0, Math.PI * 2);
+    c.arc(10, -13, 2.8, 0, Math.PI * 2);
+    c.fill();
+
+    // Cabeza
+    c.fillStyle = '#8d6e63';
+    c.beginPath();
+    c.arc(0, -3, 13.5, 0, Math.PI * 2);
+    c.fill();
+    c.stroke();
+
+    // Hocico
+    c.fillStyle = '#d7ccc8';
+    c.beginPath();
+    c.ellipse(0, 0, 6.5, 4.5, 0, 0, Math.PI * 2);
+    c.fill();
+
+    // Nariz bordada
+    c.fillStyle = '#3e2723';
+    c.beginPath();
+    c.arc(0, -2, 2.2, 0, Math.PI * 2);
+    c.fill();
+
+    // Ojo botón cosido izquierdo ('X')
+    c.lineWidth = 1.6;
+    c.strokeStyle = '#271c19';
+    c.beginPath();
+    c.moveTo(-6, -7); c.lineTo(-2, -3);
+    c.moveTo(-2, -7); c.lineTo(-6, -3);
+    c.stroke();
+
+    // Ojo derecho botón redondo
+    c.fillStyle = '#271c19';
+    c.beginPath();
+    c.arc(4, -5, 2.2, 0, Math.PI * 2);
+    c.fill();
+
+    // Corbatín rojo de Rupert
+    c.fillStyle = '#ef4444';
+    c.beginPath();
+    c.moveTo(0, 10);
+    c.lineTo(-6, 7);
+    c.lineTo(-6, 13);
+    c.closePath();
+    c.moveTo(0, 10);
+    c.lineTo(6, 7);
+    c.lineTo(6, 13);
+    c.closePath();
+    c.fill();
+    c.stroke();
+    c.beginPath();
+    c.arc(0, 10, 2, 0, Math.PI * 2);
+    c.fill();
+    c.restore();
+  }
+
+  function dibujarPistolaRayos(c) {
+    c.save();
+    c.lineWidth = 2;
+    c.strokeStyle = '#1e1b4b';
+
+    // Cuerpo rojo ovalado
+    c.fillStyle = '#dc2626';
+    c.beginPath();
+    c.ellipse(-3, 0, 15, 9, 0, 0, Math.PI * 2);
+    c.fill();
+    c.stroke();
+
+    // Empuñadura amarilla
+    c.fillStyle = '#eab308';
+    c.beginPath();
+    c.moveTo(-9, 4);
+    c.lineTo(-13, 16);
+    c.lineTo(-5, 16);
+    c.lineTo(-3, 5);
+    c.closePath();
+    c.fill();
+    c.stroke();
+
+    // Anillos de antena de rayos
+    c.strokeStyle = '#0284c7';
+    c.lineWidth = 1.8;
+    [-1, 4, 9].forEach((off, idx) => {
+      c.beginPath();
+      c.ellipse(11 + off, 0, 1.8, 6.5 - idx * 1.4, 0, 0, Math.PI * 2);
+      c.stroke();
+    });
+
+    // Cañón con punta
+    c.strokeStyle = '#0284c7';
+    c.lineWidth = 2.2;
+    c.beginPath();
+    c.moveTo(9, 0);
+    c.lineTo(23, 0);
+    c.stroke();
+
+    // Cúpula trasera amarilla
+    c.fillStyle = '#fde047';
+    c.beginPath();
+    c.arc(-16, 0, 4.5, Math.PI * 0.5, Math.PI * 1.5);
+    c.fill();
+    c.stroke();
+    c.restore();
+  }
+
+  // 5. Planeta cartoon distante en el fondo (Saturno multiversal)
+  const planetaDistante = {
+    xRatio: 0.86,
+    yRatio: 0.16,
+    radio: 36,
+    anilloColor: 'rgba(216, 180, 254, 0.4)'
+  };
+
   let t = 0;
+  let tiempoParaSiguienteEstrella = 160;
+
   function render() {
-    t += 0.006;
-    ctx.fillStyle = '#050816';
+    t += 0.005;
+
+    // Fondo espacial profundo (Gradiente cósmico)
+    const bgGrad = ctx.createLinearGradient(0, 0, w, h);
+    bgGrad.addColorStop(0, '#030514');
+    bgGrad.addColorStop(0.5, '#070a20');
+    bgGrad.addColorStop(1, '#0c0721');
+    ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, w, h);
 
-    // Nebulosa 1 (Portal Cyan / Azul)
-    const n1X = w * 0.3 + Math.sin(t) * 90;
-    const n1Y = h * 0.35 + Math.cos(t * 0.8) * 60;
-    const g1 = ctx.createRadialGradient(n1X, n1Y, 30, n1X, n1Y, w * 0.6);
-    g1.addColorStop(0, 'rgba(56, 189, 248, 0.07)');
-    g1.addColorStop(0.5, 'rgba(30, 58, 138, 0.04)');
+    // A. Nebulosa Volumétrica 1 (Portal Verde / Esmeralda Rick)
+    const n1X = w * 0.2 + Math.sin(t * 0.7) * 70;
+    const n1Y = h * 0.3 + Math.cos(t * 0.6) * 50;
+    const g1 = ctx.createRadialGradient(n1X, n1Y, 20, n1X, n1Y, w * 0.5);
+    g1.addColorStop(0, 'rgba(16, 185, 129, 0.09)');
+    g1.addColorStop(0.5, 'rgba(6, 95, 70, 0.04)');
     g1.addColorStop(1, 'transparent');
     ctx.fillStyle = g1;
     ctx.fillRect(0, 0, w, h);
 
-    // Nebulosa 2 (Portal Púrpura / Índigo)
-    const n2X = w * 0.75 - Math.cos(t * 0.7) * 80;
-    const n2Y = h * 0.7 + Math.sin(t * 0.9) * 70;
-    const g2 = ctx.createRadialGradient(n2X, n2Y, 30, n2X, n2Y, w * 0.55);
-    g2.addColorStop(0, 'rgba(168, 85, 247, 0.06)');
-    g2.addColorStop(0.5, 'rgba(79, 70, 229, 0.03)');
+    // B. Nebulosa Volumétrica 2 (Púrpura / Rosa Cósmico Multiverso)
+    const n2X = w * 0.78 - Math.cos(t * 0.5) * 80;
+    const n2Y = h * 0.68 + Math.sin(t * 0.8) * 60;
+    const g2 = ctx.createRadialGradient(n2X, n2Y, 20, n2X, n2Y, w * 0.55);
+    g2.addColorStop(0, 'rgba(168, 85, 247, 0.08)');
+    g2.addColorStop(0.4, 'rgba(236, 72, 153, 0.04)');
     g2.addColorStop(1, 'transparent');
     ctx.fillStyle = g2;
     ctx.fillRect(0, 0, w, h);
 
-    // Ondas sinusoidales dimensionales sutiles
-    ctx.lineWidth = 1.2;
-    for (let o = 0; o < 3; o++) {
-      ctx.strokeStyle = `rgba(56, 189, 248, ${0.02 + o * 0.01})`;
+    // C. VÓRTICE DEL PORTAL INTERDIMENSIONAL (Shadertoy Vortex)
+    // El portal de donde se teletransportaron todos los elementos
+    const portalX = w * 0.12 + Math.sin(t * 0.4) * 20;
+    const portalY = h * 0.75 + Math.cos(t * 0.5) * 20;
+    const portalRadio = 85;
+
+    // Resplandor del portal
+    const gPortal = ctx.createRadialGradient(portalX, portalY, 10, portalX, portalY, portalRadio * 1.4);
+    gPortal.addColorStop(0, 'rgba(57, 255, 20, 0.22)');
+    gPortal.addColorStop(0.4, 'rgba(0, 242, 254, 0.14)');
+    gPortal.addColorStop(0.8, 'rgba(16, 185, 129, 0.04)');
+    gPortal.addColorStop(1, 'transparent');
+    ctx.fillStyle = gPortal;
+    ctx.beginPath();
+    ctx.arc(portalX, portalY, portalRadio * 1.4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Brazos espirales del portal giratorio
+    ctx.save();
+    ctx.translate(portalX, portalY);
+    ctx.rotate(-t * 2.5);
+    for (let s = 0; s < 4; s++) {
+      ctx.strokeStyle = s % 2 === 0 ? 'rgba(57, 255, 20, 0.45)' : 'rgba(56, 189, 248, 0.45)';
+      ctx.lineWidth = 2.5;
       ctx.beginPath();
-      const baseH = (h / 4) * (o + 1);
-      ctx.moveTo(0, baseH);
-      for (let x = 0; x <= w; x += 30) {
-        const y = baseH + Math.sin(x * 0.003 + t * 2 + o * 1.5) * 30;
-        ctx.lineTo(x, y);
+      const rotOffset = (s * Math.PI) / 2;
+      for (let theta = 0; theta < Math.PI * 2; theta += 0.15) {
+        const r = (theta / (Math.PI * 2)) * portalRadio * 0.85;
+        const px = Math.cos(theta + rotOffset) * r;
+        const py = Math.sin(theta + rotOffset) * r;
+        if (theta === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
       }
       ctx.stroke();
     }
+    // Núcleo blanco del portal
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(0, 0, 7 + Math.sin(t * 8) * 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
 
-    // Partículas y líneas de conexión
-    for (let i = 0; i < particulas.length; i++) {
-      const p = particulas[i];
-      p.x += p.vx;
-      p.y += p.vy;
+    // D. Planeta cartoon distante (Saturno multiversal)
+    const px = w * planetaDistante.xRatio;
+    const py = h * planetaDistante.yRatio;
+    const pr = planetaDistante.radio;
 
-      if (p.x < 0) p.x = w;
-      else if (p.x > w) p.x = 0;
-      if (p.y < 0) p.y = h;
-      else if (p.y > h) p.y = 0;
+    ctx.save();
+    const pGrad = ctx.createRadialGradient(px - pr * 0.3, py - pr * 0.3, pr * 0.1, px, py, pr);
+    pGrad.addColorStop(0, '#c084fc');
+    pGrad.addColorStop(0.7, '#6366f1');
+    pGrad.addColorStop(1, '#312e81');
+    ctx.fillStyle = pGrad;
+    ctx.beginPath();
+    ctx.arc(px, py, pr, 0, Math.PI * 2);
+    ctx.fill();
 
-      ctx.fillStyle = `rgba(${p.color}, ${p.alpha})`;
+    // Anillo exterior cartoon inclinado
+    ctx.strokeStyle = planetaDistante.anilloColor;
+    ctx.lineWidth = 5.5;
+    ctx.beginPath();
+    ctx.ellipse(px, py, pr * 1.8, pr * 0.45, -0.4, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+
+    // E. Estrellas normales parpadeantes
+    for (let i = 0; i < estrellas.length; i++) {
+      const e = estrellas[i];
+      const alphaVar = e.alpha + Math.sin(t * 5 + e.fase) * 0.2;
+      ctx.fillStyle = `rgba(${e.color}, ${Math.max(0.1, alphaVar)})`;
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.radio, 0, Math.PI * 2);
+      ctx.arc(e.x, e.y, e.radio, 0, Math.PI * 2);
       ctx.fill();
+    }
 
-      for (let j = i + 1; j < particulas.length; j++) {
-        const p2 = particulas[j];
-        const dx = p.x - p2.x;
-        const dy = p.y - p2.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 125) {
-          ctx.strokeStyle = `rgba(56, 189, 248, ${0.1 * (1 - dist / 125)})`;
-          ctx.lineWidth = 0.8;
-          ctx.beginPath();
-          ctx.moveTo(p.x, p.y);
-          ctx.lineTo(p2.x, p2.y);
-          ctx.stroke();
-        }
+    // F. Destellos cartoon de 4 puntas (✦)
+    for (let i = 0; i < destellos.length; i++) {
+      const d = destellos[i];
+      d.rot += d.velRot;
+      const escala = Math.max(0.2, Math.sin(t * 3 + d.fase));
+      const tam = d.tamanio * escala;
+
+      ctx.save();
+      ctx.translate(d.x, d.y);
+      ctx.rotate(d.rot);
+      ctx.fillStyle = d.color;
+      ctx.beginPath();
+      ctx.moveTo(0, -tam);
+      ctx.quadraticCurveTo(0, 0, tam, 0);
+      ctx.quadraticCurveTo(0, 0, 0, tam);
+      ctx.quadraticCurveTo(0, 0, -tam, 0);
+      ctx.quadraticCurveTo(0, 0, 0, -tam);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // G. Estrella fugaz ocasional (cometa)
+    tiempoParaSiguienteEstrella--;
+    if (tiempoParaSiguienteEstrella <= 0 && !estrellaFugaz) {
+      lanzarEstrellaFugaz();
+      tiempoParaSiguienteEstrella = Math.floor(Math.random() * 320 + 260);
+    }
+    if (estrellaFugaz) {
+      estrellaFugaz.x += Math.cos(estrellaFugaz.angulo) * estrellaFugaz.velocidad;
+      estrellaFugaz.y += Math.sin(estrellaFugaz.angulo) * estrellaFugaz.velocidad;
+      estrellaFugaz.vida -= estrellaFugaz.desvanecimiento;
+
+      if (estrellaFugaz.vida <= 0 || estrellaFugaz.x > w || estrellaFugaz.y > h) {
+        estrellaFugaz = null;
+      } else {
+        const colaX = estrellaFugaz.x - Math.cos(estrellaFugaz.angulo) * estrellaFugaz.longitud;
+        const colaY = estrellaFugaz.y - Math.sin(estrellaFugaz.angulo) * estrellaFugaz.longitud;
+        const gradFugaz = ctx.createLinearGradient(colaX, colaY, estrellaFugaz.x, estrellaFugaz.y);
+        gradFugaz.addColorStop(0, 'rgba(255, 255, 255, 0)');
+        gradFugaz.addColorStop(1, `rgba(56, 189, 248, ${estrellaFugaz.vida})`);
+
+        ctx.strokeStyle = gradFugaz;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(colaX, colaY);
+        ctx.lineTo(estrellaFugaz.x, estrellaFugaz.y);
+        ctx.stroke();
+
+        ctx.fillStyle = `rgba(255, 255, 255, ${estrellaFugaz.vida})`;
+        ctx.beginPath();
+        ctx.arc(estrellaFugaz.x, estrellaFugaz.y, 2.5, 0, Math.PI * 2);
+        ctx.fill();
       }
     }
+
+    // H. ELEMENTOS DE CARICATURA FLOTANDO EN GRAVEDAD CERO
+    itemsFlotantes.forEach((item) => {
+      // Movimiento natural
+      item.x += item.vx;
+      item.y += item.vy;
+      item.rot += item.velRot;
+      item.wobbleFase += item.wobbleVel;
+
+      // Interacción con cursor (empuje / repulsión en gravedad cero)
+      if (mouse.activo) {
+        const dx = item.x - mouse.x;
+        const dy = item.y - mouse.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 110 && dist > 1) {
+          const fuerza = (110 - dist) / 110;
+          item.vx += (dx / dist) * fuerza * 0.14;
+          item.vy += (dy / dist) * fuerza * 0.14;
+          item.velRot += (Math.random() - 0.5) * 0.02 * fuerza;
+        }
+      }
+
+      // Amortiguación suave para estabilizar velocidad
+      item.vx *= 0.996;
+      item.vy *= 0.996;
+      if (Math.abs(item.vx) < 0.12) item.vx = item.vx < 0 ? -0.15 : 0.15;
+      if (Math.abs(item.vy) < 0.1) item.vy = item.vy < 0 ? -0.12 : 0.12;
+
+      // Envolver límites de pantalla
+      const margen = 55;
+      if (item.x < -margen) item.x = w + margen;
+      else if (item.x > w + margen) item.x = -margen;
+      if (item.y < -margen) item.y = h + margen;
+      else if (item.y > h + margen) item.y = -margen;
+
+      // Dibujar elemento con traslación, rotación y escala
+      ctx.save();
+      const wobbleY = Math.sin(item.wobbleFase) * 4;
+      ctx.translate(item.x, item.y + wobbleY);
+      ctx.rotate(item.rot);
+      ctx.scale(item.escala, item.escala);
+
+      // Halo cósmico tenue alrededor de cada elemento
+      ctx.shadowColor = 'rgba(56, 189, 248, 0.4)';
+      ctx.shadowBlur = 10;
+
+      switch (item.tipo) {
+        case 'dona': dibujarDona(ctx); break;
+        case 'plutonio': dibujarBarraRadiactiva(ctx); break;
+        case 'duff': dibujarLataDuff(ctx); break;
+        case 'portalgun': dibujarPistolaPortales(ctx); break;
+        case 'pepinillo': dibujarPepinillo(ctx); break;
+        case 'cheesypoofs': dibujarCheesyPoofs(ctx); break;
+        case 'rupert': dibujarRupert(ctx); break;
+        case 'raygun': dibujarPistolaRayos(ctx); break;
+      }
+
+      ctx.restore();
+    });
 
     requestAnimationFrame(render);
   }
   render();
 }
+
 
 window.addEventListener('load', () => {
   iniciarFondoCosmico();

@@ -6,19 +6,30 @@
 <title>Multi-Universo de Resultados · Evaluación y Calidad de Software</title>
 <style>
 /* ========================================================
-   VARIABLES DE TEMA Y PALETA DE COLORES
+   VARIABLES DE TEMA Y PALETA DE COLORES (COSMIC MULTIVERSE)
 ======================================================== */
 :root {
-  --bg: #0a1230;
-  --panel: #121c45;
-  --panel2: #1a2760;
-  --line: #2b3a80;
-  --tx: #f1f4ff;
-  --mut: #a8b3e0;
-  --blue: #1e4bd8;
+  --bg: #050816;
+  --panel: rgba(13, 20, 48, 0.78);
+  --panel2: rgba(20, 32, 70, 0.72);
+  --line: rgba(56, 189, 248, 0.22);
+  --line-strong: rgba(56, 189, 248, 0.45);
+  --tx: #f8fafc;
+  --mut: #94a3b8;
+  --blue: #2563eb;
+  --cyan: #38bdf8;
   --gold: #f5b301;
   --ok: #22c55e;
   --bad: #ef4444;
+}
+
+#cosmicCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,24 +42,40 @@ html, body {
 }
 
 body {
-  background: radial-gradient(900px 500px at 90% -10%, #1e4bd844, transparent 70%),
-              radial-gradient(700px 400px at -10% 110%, #f5b30122, transparent 70%),
-              var(--bg);
-  background-attachment: fixed;
+  background: var(--bg);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
 }
 
 body::before {
   content: "";
   position: fixed;
   left: 0; right: 0; top: 0;
-  height: 6px;
-  background: linear-gradient(90deg, #38bdf8 0%, #f5b301 33%, #ef4444 66%, #a855f7 100%);
-  z-index: 20;
+  height: 5px;
+  background: linear-gradient(90deg, #38bdf8 0%, #22c55e 25%, #f5b301 50%, #ef4444 75%, #a855f7 100%);
+  z-index: 100;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.6);
 }
 
 /* ========================================================
-   SISTEMA DE VISTAS (PANTALLAS EN HTML)
+   SISTEMA DE VISTAS Y CONTENEDOR CONSISTENTE (UNIFIED WIDTH)
 ======================================================== */
+main {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+  box-sizing: border-box;
+}
+
+.vista {
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .vista[hidden] {
   display: none !important;
 }
@@ -157,7 +184,6 @@ body::before {
 /* ========================================================
    COMPONENTES Y ELEMENTOS DE DISEÑO
 ======================================================== */
-main { max-width: 960px; margin: 0 auto; padding: 22px 16px 60px; }
 h1 { font-size: clamp(30px, 5vw, 50px); line-height: 1.15; letter-spacing: -.02em; }
 h2 { font-size: clamp(22px, 4vw, 32px); margin-bottom: 10px; }
 h3 { font-size: 14px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin: 16px 0 8px; }
@@ -165,9 +191,13 @@ p { line-height: 1.55; color: #dfe5ff; margin-bottom: 10px; }
 
 .card {
   background: var(--panel);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--line);
   border-radius: 16px;
-  padding: 20px;
+  padding: 22px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .btn {
@@ -217,27 +247,67 @@ p { line-height: 1.55; color: #dfe5ff; margin-bottom: 10px; }
 .small { font-size: 13px; color: var(--mut); }
 
 /* Portada */
-.hero { padding: 30px 6px 10px; }
+.hero {
+  padding: 16px 0 0;
+  width: 100%;
+  box-sizing: border-box;
+}
 .hero .kick {
   color: var(--gold);
   font-weight: 800;
   letter-spacing: .18em;
   text-transform: uppercase;
-  font-size: 14px;
-  margin-bottom: 10px;
+  font-size: 13.5px;
+  margin-bottom: 12px;
 }
-.hero h1 em { font-style: normal; color: var(--gold); }
-.cast-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 18px 0; }
+.hero h1 {
+  margin-bottom: 14px;
+}
+.hero h1 em {
+  font-style: normal;
+  color: var(--gold);
+}
+.hero p {
+  width: 100%;
+  box-sizing: border-box;
+}
+.cast-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  width: 100%;
+  margin: 20px 0;
+  box-sizing: border-box;
+}
+@media (max-width: 660px) {
+  .cast-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 .mini {
   display: flex;
   gap: 10px;
   align-items: center;
   background: var(--panel);
+  backdrop-filter: blur(10px);
   border: 1px solid var(--line);
   border-radius: 999px;
-  padding: 6px 16px 6px 6px;
-  font-size: 14px;
+  padding: 6px 12px 6px 6px;
+  font-size: 13.5px;
   font-weight: 600;
+  width: 100%;
+  box-sizing: border-box;
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.mini:hover {
+  transform: translateY(-2px);
+  border-color: var(--cyan);
+  box-shadow: 0 4px 15px rgba(56, 189, 248, 0.25);
+}
+.mini .nombre {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .mini .av {
   width: 36px;
@@ -450,33 +520,45 @@ p { line-height: 1.55; color: #dfe5ff; margin-bottom: 10px; }
    MEJORAS VISUALES Y EQUIPO (GRUPO 3)
 ======================================================== */
 .team-card {
-  background: linear-gradient(145deg, #121c45, #0c1435);
-  border: 1px solid #38bdf844 !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  background: linear-gradient(145deg, rgba(16, 25, 62, 0.8), rgba(9, 15, 38, 0.8));
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+  box-shadow: 0 4px 22px rgba(0, 0, 0, 0.4);
+  width: 100%;
+  box-sizing: border-box;
 }
 .team-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 .team-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+@media (max-width: 560px) {
+  .team-grid {
+    grid-template-columns: 1fr;
+  }
 }
 .team-badge {
   background: var(--panel2);
   border: 1px solid var(--line);
   border-radius: 10px;
-  padding: 8px 12px;
+  padding: 9px 14px;
   font-size: 13.5px;
   font-weight: 600;
   color: #e2e8f0;
   display: flex;
   align-items: center;
-  gap: 8px;
-  transition: transform 0.15s, border-color 0.15s;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
 .team-badge:hover {
   transform: translateY(-2px);
@@ -525,6 +607,9 @@ p { line-height: 1.55; color: #dfe5ff; margin-bottom: 10px; }
 </head>
 <body>
 
+<!-- Lienzo Shader de Fondo Cósmico (Baja intensidad, alta inmersión) -->
+<canvas id="cosmicCanvas"></canvas>
+
 <!-- Pantalla de carga para sincronización -->
 <div id="pantallaCarga">
   <div class="loader-card">
@@ -558,11 +643,11 @@ p { line-height: 1.55; color: #dfe5ff; margin-bottom: 10px; }
     <div class="hero pop">
       <div class="kick" id="heroSubtitulo"></div>
       <h1 id="heroTitulo"></h1>
-      <p id="heroDescripcion" style="font-size:18px;max-width:720px;margin-top:14px"></p>
+      <p id="heroDescripcion" style="font-size:18px;width:100%;margin-top:14px;line-height:1.6"></p>
       <div class="cast-row" id="heroPersonajes"></div>
 
       <!-- Tarjeta de Grupo 3 e Integrantes -->
-      <div class="card team-card" style="max-width:720px;margin-bottom:16px">
+      <div class="card team-card" style="margin-bottom:16px">
         <div class="team-header">
           <span class="chip" style="background:#38bdf822;border-color:#38bdf8;color:#7dd3fc;margin:0">🎓 Grupo 3</span>
           <b style="font-size:15px;color:var(--tx)">Integrantes del Proyecto</b>
@@ -575,7 +660,7 @@ p { line-height: 1.55; color: #dfe5ff; margin-bottom: 10px; }
         </div>
       </div>
 
-      <div class="card" style="max-width:720px">
+      <div class="card">
         <h3 id="heroInstruccionesTitulo" style="margin-top:0"></h3>
         <ul class="recap" style="list-style:disc">
           <li><b>7 Niveles temáticos:</b> en cada nivel estudias la <b>teoría</b> interactiva y luego respondes <b>6 preguntas</b>.</li>
@@ -749,7 +834,7 @@ p { line-height: 1.55; color: #dfe5ff; margin-bottom: 10px; }
         <span class="stat"><b id="finalPuntosTotales"></b>puntos</span>
         <span class="stat"><b id="finalTiempoTotal"></b>tiempo total</span>
       </div>
-      <div class="fb" id="finalGuiaBox" style="text-align:left;margin:16px auto;max-width:640px">
+      <div class="fb" id="finalGuiaBox" style="text-align:left;margin:16px 0;width:100%">
         <div class="av" id="finalGuiaAvatar">
           <img id="finalGuiaAvatarImg" src="" alt="">
         </div>
@@ -759,7 +844,7 @@ p { line-height: 1.55; color: #dfe5ff; margin-bottom: 10px; }
         </div>
       </div>
       <!-- Créditos de Grupo 3 en Pantalla Final -->
-      <div class="card team-card" style="max-width:640px;margin:18px auto;text-align:left">
+      <div class="card team-card" style="margin:18px 0;text-align:left">
         <div class="team-header">
           <span class="chip" style="background:#38bdf822;border-color:#38bdf8;color:#7dd3fc;margin:0">🎓 Grupo 3</span>
           <b style="font-size:14px;color:var(--tx)">Proyecto desarrollado por:</b>
@@ -776,7 +861,7 @@ p { line-height: 1.55; color: #dfe5ff; margin-bottom: 10px; }
         <button class="btn accent" id="btnFinalVolverMapa">🗺️ Volver al Mapa</button>
         <button class="btn ghost" id="btnFinalReiniciarJuego">Reiniciar recorrido completo</button>
       </div>
-      <p class="disc" id="finalNotaPie" style="max-width:640px;margin:20px auto 0"></p>
+      <p class="disc" id="finalNotaPie" style="width:100%;margin-top:20px"></p>
     </div>
   </section>
 
@@ -2303,7 +2388,116 @@ const MotorJuego = {
 /* ========================================================
    5. CONTROLADOR DE CARGA
 ======================================================== */
+
+/* ========================================================
+   FONDO CÓSMICO SHADER (CANVAS 2D ULTRA-FLUIDO Y DE BAJO CONTRASTE)
+======================================================== */
+function iniciarFondoCosmico() {
+  const canvas = document.getElementById('cosmicCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let w = 0, h = 0;
+  let particulas = [];
+  const CANTIDAD = 45;
+
+  function redimensionar() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', redimensionar);
+  redimensionar();
+
+  for (let i = 0; i < CANTIDAD; i++) {
+    particulas.push({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      vx: (Math.random() - 0.5) * 0.35,
+      vy: (Math.random() - 0.5) * 0.35,
+      radio: Math.random() * 2 + 0.8,
+      alpha: Math.random() * 0.45 + 0.2,
+      color: Math.random() > 0.45 ? '56, 189, 248' : '168, 85, 247'
+    });
+  }
+
+  let t = 0;
+  function render() {
+    t += 0.006;
+    ctx.fillStyle = '#050816';
+    ctx.fillRect(0, 0, w, h);
+
+    // Nebulosa 1 (Portal Cyan / Azul)
+    const n1X = w * 0.3 + Math.sin(t) * 90;
+    const n1Y = h * 0.35 + Math.cos(t * 0.8) * 60;
+    const g1 = ctx.createRadialGradient(n1X, n1Y, 30, n1X, n1Y, w * 0.6);
+    g1.addColorStop(0, 'rgba(56, 189, 248, 0.07)');
+    g1.addColorStop(0.5, 'rgba(30, 58, 138, 0.04)');
+    g1.addColorStop(1, 'transparent');
+    ctx.fillStyle = g1;
+    ctx.fillRect(0, 0, w, h);
+
+    // Nebulosa 2 (Portal Púrpura / Índigo)
+    const n2X = w * 0.75 - Math.cos(t * 0.7) * 80;
+    const n2Y = h * 0.7 + Math.sin(t * 0.9) * 70;
+    const g2 = ctx.createRadialGradient(n2X, n2Y, 30, n2X, n2Y, w * 0.55);
+    g2.addColorStop(0, 'rgba(168, 85, 247, 0.06)');
+    g2.addColorStop(0.5, 'rgba(79, 70, 229, 0.03)');
+    g2.addColorStop(1, 'transparent');
+    ctx.fillStyle = g2;
+    ctx.fillRect(0, 0, w, h);
+
+    // Ondas sinusoidales dimensionales sutiles
+    ctx.lineWidth = 1.2;
+    for (let o = 0; o < 3; o++) {
+      ctx.strokeStyle = `rgba(56, 189, 248, ${0.02 + o * 0.01})`;
+      ctx.beginPath();
+      const baseH = (h / 4) * (o + 1);
+      ctx.moveTo(0, baseH);
+      for (let x = 0; x <= w; x += 30) {
+        const y = baseH + Math.sin(x * 0.003 + t * 2 + o * 1.5) * 30;
+        ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    // Partículas y líneas de conexión
+    for (let i = 0; i < particulas.length; i++) {
+      const p = particulas[i];
+      p.x += p.vx;
+      p.y += p.vy;
+
+      if (p.x < 0) p.x = w;
+      else if (p.x > w) p.x = 0;
+      if (p.y < 0) p.y = h;
+      else if (p.y > h) p.y = 0;
+
+      ctx.fillStyle = `rgba(${p.color}, ${p.alpha})`;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radio, 0, Math.PI * 2);
+      ctx.fill();
+
+      for (let j = i + 1; j < particulas.length; j++) {
+        const p2 = particulas[j];
+        const dx = p.x - p2.x;
+        const dy = p.y - p2.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 125) {
+          ctx.strokeStyle = `rgba(56, 189, 248, ${0.1 * (1 - dist / 125)})`;
+          ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    requestAnimationFrame(render);
+  }
+  render();
+}
+
 window.addEventListener('load', () => {
+  iniciarFondoCosmico();
   const pantallaCarga = $('#pantallaCarga');
   const barraProgreso = $('#loaderProgreso');
   const estadoTexto = $('#loaderEstado');

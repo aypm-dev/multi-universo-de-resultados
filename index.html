@@ -445,6 +445,82 @@ p { line-height: 1.55; color: #dfe5ff; margin-bottom: 10px; }
   100% { transform: none; opacity: 1; }
 }
 .pop { animation: pop .25s ease; }
+
+/* ========================================================
+   MEJORAS VISUALES Y EQUIPO (GRUPO 3)
+======================================================== */
+.team-card {
+  background: linear-gradient(145deg, #121c45, #0c1435);
+  border: 1px solid #38bdf844 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+.team-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+.team-badge {
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.15s, border-color 0.15s;
+}
+.team-badge:hover {
+  transform: translateY(-2px);
+  border-color: #38bdf8;
+}
+
+/* Cola de bocadillo de diálogo (estilo cómic) */
+.bubble {
+  position: relative;
+}
+.bubble::before {
+  content: "";
+  position: absolute;
+  top: 36px;
+  left: -12px;
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-right: 12px solid #ffffff22;
+}
+@media (max-width: 620px) {
+  .bubble::before {
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 12px solid #ffffff22;
+    border-top: none;
+  }
+}
+
+/* Efecto de halo brillante en avatares */
+.who .av {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.who .av:hover {
+  transform: scale(1.04);
+}
+.fb .av {
+  box-shadow: 0 0 14px color-mix(in srgb, var(--c, #38bdf8) 40%, transparent);
+}
+
 </style>
 </head>
 <body>
@@ -464,8 +540,10 @@ p { line-height: 1.55; color: #dfe5ff; margin-bottom: 10px; }
 <!-- Barra superior fija (HUD) -->
 <div id="hud">
   <span class="logo" id="hudLogo">🌌 Multi-Universo</span>
+  <span class="pill" style="border-color:#38bdf866;background:#38bdf818;color:#7dd3fc;font-size:12px;padding:3px 10px">🎓 Grupo 3</span>
   <span id="hlevel" class="mut"></span>
   <span class="sp"></span>
+  <button id="btnSonido" class="pill" style="cursor:pointer;background:var(--panel2);border:1px solid var(--line);color:var(--tx)" title="Alternar audio">🔊</button>
   <span class="pill" id="hscore">⭐ 0</span>
   <span class="pill" id="htime">⏱ 00:00</span>
 </div>
@@ -482,6 +560,21 @@ p { line-height: 1.55; color: #dfe5ff; margin-bottom: 10px; }
       <h1 id="heroTitulo"></h1>
       <p id="heroDescripcion" style="font-size:18px;max-width:720px;margin-top:14px"></p>
       <div class="cast-row" id="heroPersonajes"></div>
+
+      <!-- Tarjeta de Grupo 3 e Integrantes -->
+      <div class="card team-card" style="max-width:720px;margin-bottom:16px">
+        <div class="team-header">
+          <span class="chip" style="background:#38bdf822;border-color:#38bdf8;color:#7dd3fc;margin:0">🎓 Grupo 3</span>
+          <b style="font-size:15px;color:var(--tx)">Integrantes del Proyecto</b>
+        </div>
+        <div class="team-grid">
+          <div class="team-badge"><span>👤</span> Aaron Andrés Bermúdez Jiménez</div>
+          <div class="team-badge"><span>👤</span> Carlos David Porras Brenes</div>
+          <div class="team-badge"><span>👤</span> Arath Zumbado Gaitán</div>
+          <div class="team-badge"><span>👤</span> Angel Yader Paniagua Mora</div>
+        </div>
+      </div>
+
       <div class="card" style="max-width:720px">
         <h3 id="heroInstruccionesTitulo" style="margin-top:0"></h3>
         <ul class="recap" style="list-style:disc">
@@ -665,6 +758,20 @@ p { line-height: 1.55; color: #dfe5ff; margin-bottom: 10px; }
           <span id="finalGuiaTexto"></span>
         </div>
       </div>
+      <!-- Créditos de Grupo 3 en Pantalla Final -->
+      <div class="card team-card" style="max-width:640px;margin:18px auto;text-align:left">
+        <div class="team-header">
+          <span class="chip" style="background:#38bdf822;border-color:#38bdf8;color:#7dd3fc;margin:0">🎓 Grupo 3</span>
+          <b style="font-size:14px;color:var(--tx)">Proyecto desarrollado por:</b>
+        </div>
+        <div class="team-grid">
+          <div class="team-badge"><span>👤</span> Aaron Andrés Bermúdez Jiménez</div>
+          <div class="team-badge"><span>👤</span> Carlos David Porras Brenes</div>
+          <div class="team-badge"><span>👤</span> Arath Zumbado Gaitán</div>
+          <div class="team-badge"><span>👤</span> Angel Yader Paniagua Mora</div>
+        </div>
+      </div>
+
       <div class="row" style="justify-content:center;margin-top:16px">
         <button class="btn accent" id="btnFinalVolverMapa">🗺️ Volver al Mapa</button>
         <button class="btn ghost" id="btnFinalReiniciarJuego">Reiniciar recorrido completo</button>
@@ -710,6 +817,115 @@ p { line-height: 1.55; color: #dfe5ff; margin-bottom: 10px; }
 ======================================================== -->
 <script>
 'use strict';
+
+/* ========================================================
+   EFECTOS DE AUDIO PROCEDURAL (WEB AUDIO API - 0 LATENCIA, 100% OFFLINE)
+======================================================== */
+const AudioFX = {
+  ctx: null,
+  mute: false,
+  init() {
+    if (!this.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) this.ctx = new AC();
+    }
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+  },
+  playClick() {
+    if (this.mute || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(440, t);
+      gain.gain.setValueAtTime(0.04, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+      osc.start(t);
+      osc.stop(t + 0.04);
+    } catch(e) {}
+  },
+  playAcierto() {
+    if (this.mute || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      const notas = [523.25, 659.25, 783.99, 1046.50]; // Acorde C Mayor arpegiado
+      notas.forEach((freq, idx) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.type = 'triangle';
+        const st = t + (idx * 0.07);
+        osc.frequency.setValueAtTime(freq, st);
+        gain.gain.setValueAtTime(0.12, st);
+        gain.gain.exponentialRampToValueAtTime(0.001, st + 0.28);
+        osc.start(st);
+        osc.stop(st + 0.28);
+      });
+    } catch(e) {}
+  },
+  playFallo() {
+    if (this.mute || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(160, t);
+      osc.frequency.linearRampToValueAtTime(100, t + 0.28);
+      gain.gain.setValueAtTime(0.12, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+      osc.start(t);
+      osc.stop(t + 0.3);
+    } catch(e) {}
+  },
+  playComodin() {
+    if (this.mute || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(600, t);
+      osc.frequency.exponentialRampToValueAtTime(1200, t + 0.18);
+      gain.gain.setValueAtTime(0.1, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+      osc.start(t);
+      osc.stop(t + 0.22);
+    } catch(e) {}
+  },
+  playFanfarria() {
+    if (this.mute || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      const notas = [523.25, 523.25, 523.25, 659.25, 783.99, 1046.50];
+      const tiempos = [0, 0.1, 0.2, 0.3, 0.45, 0.65];
+      notas.forEach((freq, i) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.type = 'triangle';
+        const st = t + tiempos[i];
+        osc.frequency.setValueAtTime(freq, st);
+        gain.gain.setValueAtTime(0.14, st);
+        gain.gain.exponentialRampToValueAtTime(0.001, st + 0.4);
+        osc.start(st);
+        osc.stop(st + 0.4);
+      });
+    } catch(e) {}
+  }
+};
+
 
 const $ = (selector, contexto = document) => contexto.querySelector(selector);
 const $$ = (selector, contexto = document) => [...contexto.querySelectorAll(selector)];
@@ -1824,6 +2040,7 @@ const MotorJuego = {
     });
 
     btnComodin.onclick = () => {
+      AudioFX.playComodin();
       if (!partida.comodinDisponible || partida.respondida) return;
       partida.comodinDisponible = false;
       btnComodin.disabled = true;
@@ -1862,6 +2079,7 @@ const MotorJuego = {
     partida.respondida = true;
 
     const esCorrecto = qActual.opciones[indiceOpcion].esCorrecta;
+    if (esCorrecto) AudioFX.playAcierto(); else AudioFX.playFallo();
 
     $$('#quizContenedorOpciones button').forEach(btn => {
       const k = +btn.dataset.opcion;
@@ -1984,6 +2202,7 @@ const MotorJuego = {
   },
 
   mostrarPantallaFinal() {
+    AudioFX.playFanfarria();
     this.partidaActual = null;
     this.establecerSubtituloHUD('¡Recorrido Completado!');
     this.actualizarHUD();
@@ -2059,6 +2278,23 @@ const MotorJuego = {
         this.tecladoQuizHandler(e);
       }
     });
+
+        // Configurar control de sonido
+    const btnSonido = $('#btnSonido');
+    if (btnSonido) {
+      btnSonido.addEventListener('click', () => {
+        AudioFX.init();
+        AudioFX.mute = !AudioFX.mute;
+        btnSonido.textContent = AudioFX.mute ? '🔇' : '🔊';
+        btnSonido.title = AudioFX.mute ? 'Audio silenciado (clic para activar)' : 'Audio activado (clic para silenciar)';
+      });
+    }
+
+    // Inicializar contexto de audio en primer clic
+    document.addEventListener('click', () => {
+      AudioFX.init();
+      AudioFX.playClick();
+    }, { capture: true, passive: true });
 
     this.mostrarPortada();
   }
